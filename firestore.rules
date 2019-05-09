@@ -1,0 +1,29 @@
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isLoggedIn() {
+      return request.auth.uid != null;
+    }
+
+    function isEventOwner() {
+      return request.resource.data.creator == get(/databases/$(database)/documents/users/$(request.auth.uid))
+    }
+
+    match /events/ {
+      allow create, update: if isLoggedIn() && isEventOwner();
+      allow read: if isLoggedIn();
+      allow delete: if false;
+    }
+
+    match /users/{id} {
+      allow create: if isLoggedIn() && request.auth.uid == id;
+      allow read: if isLoggedIn();
+      allow list, update, delete: if false;
+    }
+
+    // TODO:
+    match /eventMembers/{id} {
+      allow read, write: if false;
+    }
+  }
+}
