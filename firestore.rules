@@ -9,7 +9,7 @@ service cloud.firestore {
       return request.resource.data.creator == get(/databases/$(database)/documents/users/$(request.auth.uid))
     }
 
-    match /events/ {
+    match /events {
       allow create, update: if isLoggedIn() && isEventOwner();
       allow read: if isLoggedIn();
       allow delete: if false;
